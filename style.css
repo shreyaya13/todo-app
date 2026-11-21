@@ -112,3 +112,19 @@ button[type="submit"]:hover {
 .delete-btn:hover {
   color: #ef4444;
 }
+.clear-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: transparent;
+  color: #cbd5e1;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}

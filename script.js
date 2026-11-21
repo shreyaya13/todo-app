@@ -53,3 +53,10 @@ form.addEventListener('submit', (event) => {
 });
 
 renderTasks();
+const clearCompletedBtn = document.getElementById('clear-completed');
+
+clearCompletedBtn.addEventListener('click', () => {
+  tasks = tasks.filter((task) => !task.completed);
+  saveTasks();
+  renderTasks();
+});
