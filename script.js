@@ -1,17 +1,45 @@
 const form = document.getElementById('todo-form');
 const input = document.getElementById('todo-input');
 const list = document.getElementById('todo-list');
+const clearCompletedBtn = document.getElementById('clear-completed');
+const taskCounter = document.getElementById('task-counter');
+const filterButtons = document.querySelectorAll('.filter-btn');
+const completedCountEl = document.getElementById('completed-count');
+const incompleteCountEl = document.getElementById('incomplete-count');
+const pendingCountEl = document.getElementById('pending-count');
 
 let tasks = JSON.parse(localStorage.getItem('shreyaTodos')) || [];
+let currentFilter = 'all';
 
 function saveTasks() {
   localStorage.setItem('shreyaTodos', JSON.stringify(tasks));
 }
 
+function updateCounter() {
+  const remaining = tasks.filter((task) => !task.completed).length;
+  taskCounter.textContent = `${remaining} ${remaining === 1 ? 'task' : 'tasks'} left`;
+}
+
+function updateStatusTable() {
+  const completedCount = tasks.filter((task) => task.completed).length;
+  const unfinishedCount = tasks.filter((task) => !task.completed).length;
+
+  completedCountEl.textContent = completedCount;
+  incompleteCountEl.textContent = unfinishedCount;
+  pendingCountEl.textContent = unfinishedCount;
+}
+
 function renderTasks() {
   list.innerHTML = '';
 
-  tasks.forEach((task, index) => {
+  const filteredTasks = tasks.filter((task) => {
+    if (currentFilter === 'active') return !task.completed;
+    if (currentFilter === 'completed') return task.completed;
+    return true;
+  });
+
+  filteredTasks.forEach((task) => {
+    const actualIndex = tasks.indexOf(task);
     const li = document.createElement('li');
     li.className = `todo-item ${task.completed ? 'completed' : ''}`;
 
@@ -19,7 +47,7 @@ function renderTasks() {
     span.className = 'todo-text';
     span.textContent = task.text;
     span.addEventListener('click', () => {
-      tasks[index].completed = !tasks[index].completed;
+      tasks[actualIndex].completed = !tasks[actualIndex].completed;
       saveTasks();
       renderTasks();
     });
@@ -29,7 +57,7 @@ function renderTasks() {
     deleteBtn.setAttribute('aria-label', 'Delete task');
     deleteBtn.textContent = '✕';
     deleteBtn.addEventListener('click', () => {
-      tasks.splice(index, 1);
+      tasks.splice(actualIndex, 1);
       saveTasks();
       renderTasks();
     });
@@ -38,7 +66,25 @@ function renderTasks() {
     li.appendChild(deleteBtn);
     list.appendChild(li);
   });
+
+  updateCounter();
+  updateStatusTable();
 }
+
+filterButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    currentFilter = btn.dataset.filter;
+    filterButtons.forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTasks();
+  });
+});
+
+clearCompletedBtn.addEventListener('click', () => {
+  tasks = tasks.filter((task) => !task.completed);
+  saveTasks();
+  renderTasks();
+});
 
 form.addEventListener('submit', (event) => {
   event.preventDefault();
@@ -53,43 +99,3 @@ form.addEventListener('submit', (event) => {
 });
 
 renderTasks();
-const clearCompletedBtn = document.getElementById('clear-completed');
-
-clearCompletedBtn.addEventListener('click', () => {
-  tasks = tasks.filter((task) => !task.completed);
-  saveTasks();
-  renderTasks();
-});
-.status-table {
-  width: 100%;
-  margin-top: 18px;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  background: rgba(15, 23, 42, 0.65);
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.status-table th,
-.status-table td {
-  padding: 9px 12px;
-  text-align: left;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-}
-
-.status-table th {
-  color: #94a3b8;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.status-table tr:last-child td {
-  border-bottom: none;
-}
-
-.status-table td:last-child {
-  text-align: right;
-  font-weight: 700;
-  color: #38bdf8;
-}
